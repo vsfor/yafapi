@@ -1,4 +1,5 @@
 .DS_Store
 .idea/
-test.php
+t.php
+phpunit.phar
 !.gitignore
