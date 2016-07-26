@@ -1,0 +1,90 @@
+#!/usr/bin/env php
+<?php
+define("APP_PATH", dirname(__FILE__)); // 项目路径
+define("DS", DIRECTORY_SEPARATOR); // 目录分隔符
+define("PS", PATH_SEPARATOR); // 路径分隔符
+define("J_ENV", "local"); // 项目运行环境划分
+define("J_DEBUG", true); // 全局调试控制
+if(J_DEBUG) {
+    error_reporting(E_ALL);
+} else {
+    error_reporting(E_WARNING);
+}
+/* 基础运行环境检测 Start */
+if (version_compare(phpversion(), '7.0.0', '<') === true) {
+    die('PHP Version 7.0 or newer needed');
+}
+if (!extension_loaded('yaf')) {
+    die('Yaf extension needed');
+}
+if (!ini_get('yaf.use_namespace')) {
+    die('php.ini - [yaf] yaf.use_namespace=1 needed');
+}
+if (!ini_get('yaf.use_namespace') || !ini_get('yaf.use_spl_autoload')) {
+    die('php.ini - [yaf] yaf.use_namespace=1 and yaf.use_spl_autoload=1 needed');
+}
+/* 环境检测 End  环境部署完成后  可移除上述代码 */
+
+/* 虚拟空间未安装Yaf扩展 可开启上述 自动加载类 */
+//if (!extension_loaded('yaf')) {
+//    define("APPLICATION_PATH", APP_PATH); /* 指向入口文件的上一级 */
+//    include(APPLICATION_PATH . '/framework/loader.php');
+//}
+/* yaf port end */
+
+
+try {
+    // : Required    :: Optional
+    $shortopts = "s::"; //Static library/command/-s::index()
+    $shortopts .= "m:"; //module
+    $shortopts .= "c:";  //controller
+    $shortopts .= "a:"; //action
+    $shortopts .= "h"; //? show help
+    $longopts  = array(
+        "params::",    // Optional value
+        "help",           // show help
+    );
+    $options = getopt($shortopts, $longopts);
+    if(empty($options) || isset($params['h']) || isset($params['help'])) {
+        echo ('EG:#php yaf -shello  | to call common/command/Hello::index() method').PHP_EOL;
+        echo ('EG:#php yaf -mmodule -ccontroller -aaction '.PHP_EOL
+            .'    to call module/controller/action use Simple router').PHP_EOL;
+        echo ('Use --params to set parameters, EG: --params="a=str&b=2" ').PHP_EOL;
+        echo ('推荐使用 module/controller/action 方式调用。'.PHP_EOL
+                .' 默认:m=Index|c=Hello|a=Index'.PHP_EOL
+                .' 样例:m=Cron|c=Sayhi|a=morning'.PHP_EOL
+                .' 使用:#php yaf -mcron -csayhi -amorning --params="k=v&k2=2"').PHP_EOL;
+        echo ('Use -h or --help to show this help').PHP_EOL;
+        exit();
+    }
+    $params = [];
+    if(isset($options['params'])) parse_str($options['params'],$params);
+
+    $app = new \Yaf\Application(APP_PATH . "/console/config/" . J_ENV . ".ini");
+
+    $app->bootstrap();//执行bootstrap 初始化相关资源
+    
+    /** 使用 common/command/目录下的类方法   静态方法调用  [不推荐] */
+    $_s = isset($options['s']) ? ($options['s'] ? ucfirst($options['s']) : 'Hello') : '';
+    if($_s) {
+        $app->execute(['\command\\'.$_s, 'index'],$params);
+    } else {
+        /** 使用 console 子项目中的模块控制器方法 [推荐] */
+        $_m = isset($options['m']) ? ($options['m']?ucfirst($options['m']):'Index') : 'Index';
+        $_c = isset($options['c']) ? ($options['c']?ucfirst($options['c']):'Hello') : 'Hello';
+        $_a = isset($options['a']) ? ($options['a']?ucfirst($options['a']):'Index') : 'Index';
+        $request = new \Yaf\Request\Simple('CLI',$_m,$_c,$_a,$params);
+        $app->getDispatcher()->dispatch($request);
+    }
+
+} catch (\Exception $e) {
+    echo PHP_EOL.'==Exception Info Start============'.PHP_EOL;
+    var_dump($argv);
+    echo PHP_EOL.'============='.PHP_EOL;
+    print_r($e->getMessage());
+    echo PHP_EOL.'============='.PHP_EOL;
+    print_r($e->getTrace());
+    echo PHP_EOL.'============='.PHP_EOL;
+    print_r($e->getTraceAsString());
+    echo PHP_EOL.'==Exception Info End============'.PHP_EOL;
+}

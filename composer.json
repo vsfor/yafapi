@@ -1,0 +1,14 @@
+{
+    "name": "jeen/yafapi",
+    "description": "yaf api project",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "wj922",
+            "email": "wj922@qq.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {}
+}

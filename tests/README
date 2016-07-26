@@ -1,0 +1,14 @@
+oldphpunit.phar is for php version under 7.0 test case
+phpunit.phar is for php version newer than php5.6 or 7.0
+
+用法:
+一、直接使用默认配置 phpunit.xml
+./phpunit.phar path/to/[File]
+
+二、当phpunit.xml文件不存在，或者你需要使用自定义的配置文件时，使用如下方法
+1) 直接指定单测试文件路径
+./phpunit.phar -c pu.xml common/helper/JTTest.php
+
+2) 指定待测试文件所在目录,目录下的所有文件均会执行测试
+./phpunit.phar -c pu.xml common
+./phpunit.phar -c pu.xml common/helper
