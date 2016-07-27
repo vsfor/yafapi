@@ -1,5 +1,40 @@
 # 使用yaf搭建的简易API服务框架
 
+```
+测试环境
+php v7.0.7
+yaf v3.0.3
+yar v2.0.1
+*可使用php5.4+的配套扩展*
+mysql 5.6.21
+nginx 1.10.1
+
+nginx conf example:
+
+server
+{
+        listen       80;
+        server_name  yafapi.local.com;
+        index index.php;
+        root  /data/www/yaf/yafapi/apiopen/web;
+
+        if (!-e $request_filename) {
+                rewrite ^(.*)$ /index.php/$1 last;
+        }
+
+        location ~ [^/]\.php(/|$)
+        {
+                fastcgi_pass  127.0.0.1:9007;
+                fastcgi_index index.php;
+                include fastcgi.conf;
+        }
+ 
+        access_log  off;
+}
+
+
+```
+
 ## 项目模块
 ### api  api 调用
 ### synapi  rpc 调用 基于yar
@@ -37,6 +72,7 @@ yar.timeout = 3000
 #### 建议返回值键名规避各变成语言的关键字和保留字
 
 **注意**
-*使用 api yar 时,需要设置vendor/jeen/JApi apiUrl *
+
+*使用 api yar 时,需要配置中的 vendor/jeen/JApi apiUrl与相关服务环境的配置*
 
 *更多说明待完善*
