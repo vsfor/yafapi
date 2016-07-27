@@ -41,5 +41,27 @@ class HelloController extends \basecontroller\Console
 		Jeen::echoln($t);
 	}
 
+	public function jsphpgzAction()
+	{
+		$phpArr = [
+			'a' => '数+-/\组',
+			'b.c' => 'c.d . e汉 字f-_=',
+			'中+文' => 3,
+		];
+		$phpgz = \jhelper\JCommon::jZip($phpArr);
+		Jeen::echoln($phpgz);
+		Jeen::echoln(\jhelper\JCommon::jUnzip($phpgz));
+		
+		$jsgz = 'eJw9jWEOwjAIRk/zfq6ZdB3tz7HiNYxOvf8RVjRZwvsSAg9QQ+Q5IG+RvtIKNiM2IXfKHuWKGXWJDdlHvtJxOUd6I3MafEK3G7WNBi9snabf6UHul4ovWI2R2O/dStX/sYz2E5gdHgA=';
+		$jsUngz = \jhelper\JCommon::jUnzip($jsgz);
+		Jeen::echoln($jsUngz);
+		Jeen::echoln(\jhelper\JCommon::jZip($jsUngz));
+	}
+	
+	public function dbAction()
+	{
+		$lib = \models\mysql\TBTestA::getInstance();
+		Jeen::echoln($lib->getData());
+	}
 	
 }

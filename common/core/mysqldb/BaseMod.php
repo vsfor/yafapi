@@ -2,6 +2,7 @@
 namespace core\mysqldb;
 use core\JObject;
 use vendor\jeen\JLog;
+use vendor\yiihelpers\Inflector;
 
 class BaseMod extends JObject
 {
@@ -9,9 +10,10 @@ class BaseMod extends JObject
     private static $instance;
 
     /**
+     * @param string $diy
      * @return BaseMod
      */
-    public static function getInstance($diy=''){
+    public static function getInstance($diy = ''){
         $class = get_called_class();
         $uniKey = md5($class . $diy);
         if(empty(self::$instance[$uniKey])){
@@ -41,7 +43,7 @@ class BaseMod extends JObject
 
     /**
      * 增加单条记录
-     * @param $data
+     * @param array $data
      * @return bool|string
      */
     public function insert($data)
@@ -51,7 +53,7 @@ class BaseMod extends JObject
             . $this->getTbName()
             . " (`" . implode("`, `", $cols) . "`) "
             . "VALUES (:" . implode(", :", $cols) . ") ";
-        $stmt = Connection::getInstance($this->dbName)->prepare($sql);
+        $stmt = Connection::getInstance($this->getDbName())->prepare($sql);
         foreach ($data as $k => $v) {
             if ($v === false) {
                 $v = 0;
@@ -66,15 +68,15 @@ class BaseMod extends JObject
             throw $e;
         }
         if ($res) {
-            return Connection::getInstance($this->dbName)->lastInsertId();
+            return Connection::getInstance($this->getDbName())->lastInsertId();
         }
         return false;
     }
 
     /**
      * 增加多条记录
-     * @param $columns
-     * @param $rows
+     * @param array $columns
+     * @param array $rows
      * @return bool|int
      */
     public function batchInsert($columns, $rows)
@@ -100,7 +102,7 @@ class BaseMod extends JObject
             . "VALUES " . implode(', ', $values);
         unset($columns);
         unset($values);
-        $stmt = Connection::getInstance($this->dbName)->prepare($sql);
+        $stmt = Connection::getInstance($this->getDbName())->prepare($sql);
         unset($sql);
         try {
             $res = $stmt->execute();
@@ -115,7 +117,7 @@ class BaseMod extends JObject
 
     /**
      * 删除记录
-     * @param $condition
+     * @param string $condition
      * @param array $params
      * @return bool|int
      */
@@ -124,7 +126,7 @@ class BaseMod extends JObject
         $sql = "DELETE FROM "
             . $this->getTbName()
             . " WHERE $condition";
-        $stmt = Connection::getInstance($this->dbName)->prepare($sql);
+        $stmt = Connection::getInstance($this->getDbName())->prepare($sql);
         foreach ($params as $k => $v) {
             $stmt->bindValue($k, $v, $this->datatype($v));
         }
@@ -141,33 +143,69 @@ class BaseMod extends JObject
 
     /**
      * 更新记录
-     * @param $data
+     * @param array $data
      * @param string $condition  不可包含 ? 占位符
      * @param array $params  必须使用 :param 占位符
      * @return bool|int
      */
     protected function update($data, $condition = '', $params = [])
     {
-        $cols = array_keys($data);
+        $sets = [];
+        $vals = [];
+        foreach ($data as $col=>$val) {
+            $sets[] = "`$col` = :new_{$col}_val";
+            $vals[":new_{$col}_val"] = $val;
+        }
+        if (empty($sets)) return 0;
+
         $sql = "UPDATE "
             . $this->getTbName()
-            . " SET `" . implode("` = ?, `", $cols) . "` = ?"
+            . " SET " . implode(", ", $sets)
             . (($condition) ? " WHERE $condition" : "");
-        $stmt = Connection::getInstance($this->dbName)->prepare($sql);
-        $values = array_values($data);
-        foreach ($values as $k => $v) {
-            if (is_string($v)) {
-                $v = $this->quoteValue($v);
-            } elseif ($v === false) {
-                $v = 0;
-            } elseif ($v === null) {
-                $v = 'NULL';
-            }
-            $stmt->bindValue($k+1, $v, $this->datatype($v));
+        $stmt = Connection::getInstance($this->getDbName())->prepare($sql);
+
+        foreach ($vals as $k => $v) {
+            $stmt->bindValue($k, $v, $this->datatype($v));
         }
         foreach ($params as $k => $v) {
             $stmt->bindValue($k, $v, $this->datatype($v));
         }
+
+        $res = $stmt->execute();
+        if ($res) {
+            return $stmt->rowCount();
+        }
+        return false;
+    }
+
+    /**
+     * 更新记录统计数量
+     * @param array $data
+     * @param string $condition  不可包含 ? 占位符
+     * @param array $params  必须使用 :param 占位符
+     * @return bool|int
+     */
+    protected function updateCounters($data, $condition = '', $params = [])
+    {
+        $sets = [];
+        foreach ($data as $col=>$val) {
+            $val = intval($val);
+            if ($val != 0) {
+                $sets[] = "`$col` = (`$col`+($val))";
+            }
+        }
+        if (empty($sets)) return 0;
+
+        $sql = "UPDATE "
+            . $this->getTbName()
+            . " SET " . implode(", ", $sets)
+            . (($condition) ? " WHERE $condition" : "");
+        $stmt = Connection::getInstance($this->getDbName())->prepare($sql);
+
+        foreach ($params as $k => $v) {
+            $stmt->bindValue($k, $v, $this->datatype($v));
+        }
+
         $res = $stmt->execute();
         if ($res) {
             return $stmt->rowCount();
@@ -179,7 +217,7 @@ class BaseMod extends JObject
     {
         $this->limit(1);
         $sql = $this->getSql();
-        $stmt = Connection::getInstance($this->dbName)->prepare($sql);
+        $stmt = Connection::getInstance($this->getDbName())->prepare($sql);
         foreach ($this->params as $k => $v) {
             $stmt->bindValue($k, $v, $this->dataType($v));
         }
@@ -198,7 +236,7 @@ class BaseMod extends JObject
     public function all()
     {
         $sql = $this->getSql();
-        $stmt = Connection::getInstance($this->dbName)->prepare($sql);
+        $stmt = Connection::getInstance($this->getDbName())->prepare($sql);
         foreach ($this->params as $k => $v) {
             $stmt->bindValue($k, $v, $this->dataType($v));
         }
@@ -227,7 +265,7 @@ class BaseMod extends JObject
             $sql .= " GROUP BY {$this->group}";
         }
 
-        $stmt = Connection::getInstance($this->dbName)->prepare($sql);
+        $stmt = Connection::getInstance($this->getDbName())->prepare($sql);
         foreach ($this->params as $k => $v) {
             $stmt->bindValue($k, $v, $this->dataType($v));
         }
@@ -245,7 +283,7 @@ class BaseMod extends JObject
     public function scalar()
     {
         $sql = $this->getSql();
-        $stmt = Connection::getInstance($this->dbName)->prepare($sql);
+        $stmt = Connection::getInstance($this->getDbName())->prepare($sql);
         foreach ($this->params as $k => $v) {
             $stmt->bindValue($k, $v, $this->dataType($v));
         }
@@ -278,6 +316,10 @@ class BaseMod extends JObject
         return $this;
     }
 
+    /**
+     * @param int $limit
+     * @return $this
+     */
     public function limit($limit)
     {
         $this->limit = intval($limit);
@@ -285,6 +327,10 @@ class BaseMod extends JObject
         return $this;
     }
 
+    /**
+     * @param int $offset
+     * @return $this
+     */
     public function offset($offset)
     {
         $this->offset = intval($offset);
@@ -292,6 +338,11 @@ class BaseMod extends JObject
         return $this;
     }
 
+    /**
+     * @param string $condition
+     * @param array $params
+     * @return $this
+     */
     public function where($condition,$params=[])
     {
         $this->where = $condition;
@@ -300,6 +351,11 @@ class BaseMod extends JObject
         return $this;
     }
 
+    /**
+     * @param string $condition
+     * @param array $params
+     * @return $this
+     */
     public function andWhere($condition,$params=[])
     {
         if($this->where == '') {
@@ -312,6 +368,11 @@ class BaseMod extends JObject
         return $this;
     }
 
+    /**
+     * @param string $condition
+     * @param array $params
+     * @return $this
+     */
     public function orWhere($condition,$params=[])
     {
         if($this->where == '') {
@@ -324,6 +385,10 @@ class BaseMod extends JObject
         return $this;
     }
 
+    /**
+     * @param string $orderBy
+     * @return $this
+     */
     public function orderBy($orderBy)
     {
         if(is_string($orderBy)) {
@@ -333,6 +398,10 @@ class BaseMod extends JObject
         return $this;
     }
 
+    /**
+     * @param string|array $groupBy
+     * @return $this
+     */
     public function groupBy($groupBy)
     {
         if(is_string($groupBy)) {
@@ -346,6 +415,10 @@ class BaseMod extends JObject
         return $this;
     }
 
+    /**
+     * @param array $params
+     * @return $this
+     */
     protected function addParams($params)
     {
         if (!empty($params)) {
@@ -364,6 +437,9 @@ class BaseMod extends JObject
         return $this;
     }
 
+    /**
+     * @return string
+     */
     protected function getSql()
     {
         if($this->sql) return $this->sql;
@@ -390,6 +466,10 @@ class BaseMod extends JObject
         return $this->sql;
     }
 
+    /**
+     * @param mixed $str
+     * @return string
+     */
     protected function quoteValue($str)
     {
         $str = str_replace("\\","\\\\",$str);
@@ -397,6 +477,10 @@ class BaseMod extends JObject
         return "'".str_replace("'","\\'",$str)."'";
     }
 
+    /**
+     * @param mixed $param
+     * @return int
+     */
     protected function dataType($param)
     {
         if (is_bool($param)) {
@@ -412,24 +496,27 @@ class BaseMod extends JObject
 
     protected function getLastInsertId()
     {
-        return Connection::getInstance($this->dbName)->lastInsertId();
+        return Connection::getInstance($this->getDbName())->lastInsertId();
     }
 
     protected function startTrans()
     {
-        return Connection::getInstance($this->dbName)->beginTransaction();
+        return Connection::getInstance($this->getDbName())->beginTransaction();
     }
 
     protected function commit()
     {
-        return Connection::getInstance($this->dbName)->commit();
+        return Connection::getInstance($this->getDbName())->commit();
     }
 
     protected function rollBack()
     {
-        return Connection::getInstance($this->dbName)->rollBack();
+        return Connection::getInstance($this->getDbName())->rollBack();
     }
 
+    /**
+     * @return string
+     */
     public function getRawSql()
     {
         if(!$this->sql) $this->sql = $this->getSql();
@@ -466,7 +553,7 @@ class BaseMod extends JObject
     {
         if($this->tbName) return $this->tbName;
         $ca = explode('\\TB',get_called_class());
-        $this->tbName = isset($ca[1]) ? strtolower($ca[1]) : 'TableNotExist';
+        $this->tbName = isset($ca[1]) ? strtolower(preg_replace('/(?<=\\w)([A-Z])/', '_\\1', $ca[1])) : 'TableNotExist';
         return $this->tbName;
     }
 
@@ -488,12 +575,12 @@ class BaseMod extends JObject
 
     public function exec($sql)
     {
-        return Connection::getInstance($this->dbName)->exec($sql);
+        return Connection::getInstance($this->getDbName())->exec($sql);
     }
 
     public function query($sql, $params = [])
     {
-        $stmt = Connection::getInstance($this->dbName)->prepare($sql);
+        $stmt = Connection::getInstance($this->getDbName())->prepare($sql);
         foreach ($params as $k => $v) {
             $stmt->bindValue($k, $v, $this->dataType($v));
         }

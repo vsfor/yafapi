@@ -283,17 +283,27 @@ class JCommon
         }
     }
 
-    //压缩编码
-    public static function jZip($str)
+    /**
+     * 压缩 -- 加入了 urlencode , 用于解决 js 解压缩时的中文编码问题
+     * @param array|string|int $obj
+     * @return string
+     */
+    public static function jZip($obj)
     {
-        if(is_array($str)) $str = json_encode($str);
-        return base64_encode(gzcompress($str));
+        //放到js中 解压  空格 变 + 号
+//        return base64_encode(gzcompress(urlencode(json_encode($obj))));
+
+        return base64_encode(gzcompress(rawurlencode(json_encode($obj))));
     }
 
-    //解压缩编码
+    /**
+     * 解压缩 -- 加入了 urldecode , 用于解决 js 压缩时的中文编码问题
+     * @param string $str
+     * @return mixed
+     */
     public static function jUnzip($str)
     {
-        return gzuncompress(base64_decode($str));
+        return json_decode(rawurldecode(gzuncompress(base64_decode($str))));
     }
 
 }
