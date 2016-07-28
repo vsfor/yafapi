@@ -1,13 +1,10 @@
 <?php
 namespace basecontroller;
 
-use core\Code;
 use core\Response;
 use jhelper\JCommon;
-use jhelper\JHash;
 use vendor\jeen\JLog;
 use Yaf\Controller_Abstract;
-use Yaf\Dispatcher;
 
 class ApiYar extends Controller_Abstract
 {

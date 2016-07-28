@@ -25,7 +25,7 @@ class JLog
 
     private static function jeenLog($level, $message, array $content = [], $module = '')
     {
-        $path = self::$log_path . DS . ($module?:self::$log_dir) . DS;
+        $path = self::$log_path . DS . self::$log_dir . DS . ($module ? $module . DS : '');
         JFile::createDirectory($path, 0777); //目录不存在 则创建目录 并开放权限
 
         $file = $path . $level . date("_Y-m-d") . '.log';

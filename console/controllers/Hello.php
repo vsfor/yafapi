@@ -64,4 +64,23 @@ class HelloController extends \basecontroller\Console
 		Jeen::echoln($lib->getData());
 	}
 	
+	public function cacheAction()
+	{
+		$r = \core\JRedis::getInstance();
+		
+		$key = 'api:rateTest'; 
+		$r->lPush($key, 1); 
+		Jeen::echoln(json_encode($r->lRange($key, 0, -1))); 
+		Jeen::echoln($r->expire($key, 3)); 
+		sleep(3);
+		$r->lPush($key,2);
+		Jeen::echoln(json_encode($r->lRange($key,0,-1)));
+		Jeen::echoln($r->expire($key, 3));
+		sleep(2);
+		$r->lPush($key, 3);
+		Jeen::echoln($r->expire($key, 3));
+		sleep(2);
+		Jeen::echoln(json_encode($r->lRange($key,0,-1)));
+	}
+	
 }
