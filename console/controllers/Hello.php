@@ -54,6 +54,7 @@ class HelloController extends \basecontroller\Console
 			'b.c' => 'c.d . e汉 字f-_=',
 			'中+文' => 3,
 		];
+		Jeen::echoln(json_encode($phpArr, JSON_UNESCAPED_UNICODE));
 		$phpgz = \jhelper\JCommon::jZip($phpArr);
 		Jeen::echoln($phpgz);
 		Jeen::echoln(\jhelper\JCommon::jUnzip($phpgz));
@@ -62,6 +63,10 @@ class HelloController extends \basecontroller\Console
 		$jsUngz = \jhelper\JCommon::jUnzip($jsgz);
 		Jeen::echoln($jsUngz);
 		Jeen::echoln(\jhelper\JCommon::jZip($jsUngz));
+		
+		$javagz = 'eJw9jVEOwjAMQ0/zPleNdF3az4WWa0xjwP2PQALSpNiSk9hGDZHDQd6Cx0or2IzYRLkjj2CfoZhRl3gS38sznZftTC9kTo53JNiN2lwwClun6Wfayf2yMhasxkns17hS9R+W0f4F8kYenQ==';
+		$javaUngz = \jhelper\JCommon::jUnzip($javagz);
+		Jeen::echoln($javaUngz);
 	}
 	
 	public function dbAction()
