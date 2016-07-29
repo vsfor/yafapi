@@ -7,7 +7,7 @@ define("DS", DIRECTORY_SEPARATOR); /* 目录分隔符 */
 define("PS", PATH_SEPARATOR); /* 路径分隔符 */
 define("J_ENV", "local"); //项目运行环境划分
 define("J_LEVEL", 1); //项目运行级别,  压力过大时,可调高此值  实现接口降级
-define("J_DEBUG", true); //全局调试控制
+define("J_DEBUG", false); //全局调试控制
 if(J_DEBUG) {
     error_reporting(E_ALL);
 } else {

@@ -10,8 +10,17 @@ if(J_DEBUG) {
 } else {
     error_reporting(E_ERROR);
 }
-class SYNAPI {
 
+/**
+ * some comments for class
+ * Class YarAPI
+ */
+class YarAPI {
+    /**
+     * some comments for function
+     * @param $task
+     * @return null|string
+     */
     public function handle($task)
     {
         try {
@@ -26,6 +35,7 @@ class SYNAPI {
             }
             $_app = new \Yaf\Application(APP_PATH . "/apiyar/config/". J_ENV .".ini");
             $_app->bootstrap();//执行bootstrap 初始化相关资源
+            \vendor\jeen\JLog::debug('Task to Handle:|server:'.json_encode($_SERVER),[],'japi/debug');
             \vendor\jeen\JLog::debug('Task to Handle:|ps:'.json_encode($ps).'|Task:'.json_encode($task),[],'japi/debug');
             $r = explode('/',$task['r']);
             $request = new \Yaf\Request\Simple($task['m'],$r[0],$r[1],$r[2],$task['p']);
@@ -46,5 +56,5 @@ class SYNAPI {
 
 }
 
-$server = new Yar_Server(new SYNAPI());
+$server = new Yar_Server(new YarAPI());
 $server->handle();

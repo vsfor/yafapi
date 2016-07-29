@@ -9,10 +9,11 @@ class FilterApi
     const dateCheckFailed = 3;
     const versionCheckFailed = 4;
     const rateLimited = 5;
-    const levelLimited = 9;
+    const levelLimited = 6;
+    const requestMethodError = 7;
 
     /**
-     * api 请求过滤, 状态,时间,接口降级,版本,频次 ...
+     * api 请求过滤, 状态,时间,接口降级,请求方式,版本,频次 ...
      * //... 可自行补充其他过滤规则
      * @param string $api 请求的API名称  module_controller_action 构成
      * @param array $request
@@ -42,6 +43,11 @@ class FilterApi
         //todo 必须在入口文件中定义  J_LEVEL 
         if (isset($apiConfig['level']) && $apiConfig['level'] < J_LEVEL) {
             return self::levelLimited;
+        }
+        
+        //检测请求方式
+        if (isset($apiConfig['method']) && $apiConfig['method'] && !in_array($request['__method'], $apiConfig['method'])) {
+            return self::requestMethodError;
         }
         
         //检测版本是否有效

@@ -78,6 +78,29 @@ class JCommon
         }
         return true;
     }
+ 
+    /**
+     * 判断指定IP 是否在一个IP段里
+     * @param string $ip 指定IP
+     * @param string $network IP段  例：192.168.1.100/24
+     * @return bool
+     */
+    public static function ipInNetwork($ip, $network)
+    {
+        $s = explode('/', $network);
+        if (!isset($s[1])) {
+            return $ip == $network;
+        }
+        $mask = str_pad(str_repeat('1',$s[1]), 32, '0', STR_PAD_RIGHT);
+
+        $sIp = decbin(ip2long($s[0]));
+        $sNet = ($sIp & $mask);
+
+        $cIp = decbin(ip2long($ip));
+        $cNet = ($cIp & $mask);
+
+        return $cNet == $sNet;
+    }
 
     /**
      * 整型转换   排除直接 intval('23a3d') == 23 的情况

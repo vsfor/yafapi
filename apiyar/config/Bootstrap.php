@@ -5,10 +5,12 @@ class Bootstrap extends \Yaf\Bootstrap_Abstract
 {
 	public function _initConfig()
 	{
-        session_save_path(APP_PATH . '/var/session');
+//        session_save_path(APP_PATH . '/var/session');
 //        session_start();
-		\Yaf\Registry::set('config', \Yaf\Application::app()->getConfig());
-		Yaf\Dispatcher::getInstance()->autoRender(false); // 关闭自动加载模板
+		Yaf\Registry::set('config', Yaf\Application::app()->getConfig());
+        Yaf\Dispatcher::getInstance()->disableView();
+        \vendor\jeen\JLog::setLogger('apiyar');
+//		Yaf\Dispatcher::getInstance()->autoRender(false); // 关闭自动加载模板
 //        Jeen::echoln('_initConfig');
 	}
 

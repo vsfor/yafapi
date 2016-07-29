@@ -49,7 +49,9 @@ class ApiOpen extends Controller_Abstract
             $post,
             $body
         );
-        $requestParams['__requestMethod'] = $this->getRequest()->getMethod();
+
+        /* @notice 必要 用于请求方式校验 */
+//        $requestParams['__method'] = strtolower($this->getRequest()->getMethod());
 
         JLog::debug('ApiOpen '.$this->_bodyId.' Final Params:'.json_encode($requestParams), [], 'requestLog');
 
@@ -84,22 +86,28 @@ class ApiOpen extends Controller_Abstract
             case FilterApi::checkPass:
                 break;
             case FilterApi::apiNotFound:
-                $this->returnJson('', $this->_bodyId . ',没找到', Code::InvalidRequest);
+                $this->returnJson('', $this->_bodyId . ',not found', Code::InvalidRequest);
                 break;
             case FilterApi::apiClosed:
-                $this->returnJson('', $this->_bodyId . ',已停用', Code::InvalidRequest);
+                $this->returnJson('', $this->_bodyId . ',close', Code::InvalidRequest);
                 break;
             case FilterApi::dateCheckFailed:
-                $this->returnJson('', $this->_bodyId . ',维护中', Code::InvalidRequest);
+                $this->returnJson('', $this->_bodyId . ',out date', Code::InvalidRequest);
+                break;
+            case FilterApi::levelLimited:
+                $this->returnJson('', $this->_bodyId . ',level limit', Code::InvalidRequest);
+                break;
+            case FilterApi::requestMethodError:
+                $this->returnJson('', $this->_bodyId . ',__method error', Code::InvalidRequest);
                 break;
             case FilterApi::versionCheckFailed:
-                $this->returnJson('', $this->_bodyId . ',已过期', Code::InvalidRequest);
+                $this->returnJson('', $this->_bodyId . ',version expire', Code::InvalidRequest);
                 break;
             case FilterApi::rateLimited:
-                $this->returnJson('', $this->_bodyId . ',请求频繁', Code::InvalidRequest);
+                $this->returnJson('', $this->_bodyId . ',too fast', Code::InvalidRequest);
                 break;
             default:
-                $this->returnJson('', $this->_bodyId . ',未知错误', Code::InvalidRequest);
+                $this->returnJson('', $this->_bodyId . ',unknown', Code::InvalidRequest);
                 break;
         }
         if ($checkCode != FilterApi::checkPass) {

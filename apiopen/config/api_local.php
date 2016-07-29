@@ -28,13 +28,18 @@
  *          'time' => 60, //时间周期 单位(s)
  *          'max' => 30, //单周期最大请求次数
  *     ],
- *     'method' => 2, //请求方法限制  可选  0不限, 1get, 2post, 3[get,post]
+ *     'method' => ['get','post'], //请求方法限制  可选  小写 ['get', 'post', '...',...]
  *     'diyKey' => ['diyValue'], //其他自定义配置   -可选
  * ],
  *
  */
 
 return [
+    'index_index_index' => [
+        'status' => true,
+        'level' => 1,
+        'method' => ['post'],
+    ],
     'test_index_test' => [
         'status' => false,
     ],

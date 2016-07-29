@@ -19,6 +19,9 @@ class HelloController extends \basecontroller\Console
 			->setCookie('cookiebbb','ccc')
 			->setMethod('post')->setParamType('json');
 		$curl->setCookie('jeen_auth', \jhelper\JHash::getCsrf()); // 简单的跨站检测
+		$curl->setParams([
+			'timeStamp' => time() - 1600,
+		]);
 		$curl->call();
 		Jeen::echoln($curl->getRequestHeader());
 		echo '---';
@@ -36,6 +39,9 @@ class HelloController extends \basecontroller\Console
 	public function apiyarAction()
 	{
 		$yar = \vendor\jeen\JApi::getInstance('http://yarapi.local.com');
+		$yar->addTask('test/index/test',['b'=>1]);
+		$yar->addTask('test/index/test',['b'=>2]);
+		$yar->addTask('test/index/test',['b'=>3]);
 		$yar->addTask('test/index/test',['b'=>4]);
 		$t = $yar->call('test/index/test', ['a'=>2]);
 		Jeen::echoln($t);
