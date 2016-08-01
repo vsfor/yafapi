@@ -62,7 +62,6 @@ class HelloController extends \basecontroller\Console
 		$jsgz = 'eJw9jWEOwjAIRk/zfq6ZdB3tz7HiNYxOvf8RVjRZwvsSAg9QQ+Q5IG+RvtIKNiM2IXfKHuWKGXWJDdlHvtJxOUd6I3MafEK3G7WNBi9snabf6UHul4ovWI2R2O/dStX/sYz2E5gdHgA=';
 		$jsUngz = \jhelper\JCommon::jUnzip($jsgz);
 		Jeen::echoln($jsUngz);
-		Jeen::echoln(\jhelper\JCommon::jZip($jsUngz));
 		
 		$javagz = 'eJw9jVEOwjAMQ0/zPleNdF3az4WWa0xjwP2PQALSpNiSk9hGDZHDQd6Cx0or2IzYRLkjj2CfoZhRl3gS38sznZftTC9kTo53JNiN2lwwClun6Wfayf2yMhasxkns17hS9R+W0f4F8kYenQ==';
 		$javaUngz = \jhelper\JCommon::jUnzip($javagz);

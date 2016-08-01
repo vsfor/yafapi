@@ -51,7 +51,7 @@ class ApiOpen extends Controller_Abstract
         );
 
         /* @notice 必要 用于请求方式校验 */
-//        $requestParams['__method'] = strtolower($this->getRequest()->getMethod());
+        $requestParams['__method'] = strtolower($this->getRequest()->getMethod());
 
         JLog::debug('ApiOpen '.$this->_bodyId.' Final Params:'.json_encode($requestParams), [], 'requestLog');
 
@@ -77,6 +77,7 @@ class ApiOpen extends Controller_Abstract
                 break;
         }
         if ($checkCode != FilterRequest::checkPass) {
+            JLog::debug('ApiOpen Filter Request Failed, Code:'.$checkCode, [], 'requestLog');
             exit($this->getResponse()->getBody());
         }
 
@@ -111,6 +112,7 @@ class ApiOpen extends Controller_Abstract
                 break;
         }
         if ($checkCode != FilterApi::checkPass) {
+            JLog::debug('ApiOpen Filter Api Failed, Code:'.$checkCode, [], 'requestLog');
             exit($this->getResponse()->getBody());
         }
 

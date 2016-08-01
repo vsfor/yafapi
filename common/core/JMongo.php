@@ -1,5 +1,7 @@
 <?php
 namespace core;
+use vendor\jeen\JLog;
+
 class JMongo extends JObject
 {
     //-覆盖-单例模式Start
@@ -8,6 +10,7 @@ class JMongo extends JObject
     /**
      * @param string $configName
      * @return \MongoClient
+     * @throws \Exception
      */
     public static function getInstance($configName='common'){
         if(empty(self::$instance[$configName])){
@@ -20,6 +23,7 @@ class JMongo extends JObject
         new self($configName, $config->mongo->$configName);
         return self::$instance[$configName];
     }
+
     private function __construct($configName, $configInfo) {
         try {
             $this->configName = $configName;
