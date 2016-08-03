@@ -11,7 +11,8 @@ class Console extends Controller_Abstract
         if($this->getRequest()->isCli() !== true) {
             exit('permission not allowed');
         }
-        Dispatcher::getInstance()->autoRender(false);//关闭模板自动渲染
+        Dispatcher::getInstance()->disableView();//关闭视图渲染
+//        Dispatcher::getInstance()->autoRender(false);//关闭模板自动渲染
     }
 
     //获取excel表单内容

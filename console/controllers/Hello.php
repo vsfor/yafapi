@@ -93,4 +93,46 @@ class HelloController extends \basecontroller\Console
 		Jeen::echoln(json_encode($r->lRange($key,0,-1)));
 	}
 	
+	public function mongoAction()
+	{
+
+		try {
+//			$mongo = new \MongoClient("mongodb://localhost:27017");
+
+			$mongo = new \MongoDB\Driver\Manager("mongodb://localhost:27017");
+		} catch(\Exception $e) {
+			exit("MongoDB Connect Failed");
+		}
+
+		//  MongoClient  写法
+//		$dbs = $mongo->listDBs();
+//		Jeen::echoln($dbs);
+//
+//		$db = $mongo->selectDB('louli');
+//		$collection = $db->selectCollection('base_community');
+//
+//		$r = $collection->findOne();
+//		Jeen::jshow($r);
+
+		// MongoDb\Driver 写法 
+		$result = $mongo->executeQuery(
+//			'db.collection', 
+			'louli.base_community', 
+			(new MongoDB\Driver\Query(['provincecode'=>['$in'=>[32,11]]], ['limit'=>3])),
+			new MongoDB\Driver\ReadPreference(MongoDB\Driver\ReadPreference::RP_PRIMARY_PREFERRED));
+		// 返回的$result是一个对象，需要手动转换成数组。 
+		Jeen::echoln($result->toArray());
+	}
+	
+	public function mdbAction()
+	{
+		$tm = \models\mongo\TBTestA::getInstance();
+//		$tm->delete();
+//		for ($i=1; $i<11; $i++) {
+//			$tm->insert(['a'=>$i,'b'=>$i%5]);
+//		}  
+		$r = $tm->one(); 
+		Jeen::echoln($r); 
+	}
+	
 }

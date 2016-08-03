@@ -1,8 +1,6 @@
 <?php
 namespace core\mysqldb;
 use core\JObject;
-use vendor\jeen\JLog;
-use vendor\yiihelpers\Inflector;
 
 class BaseMod extends JObject
 {
@@ -148,7 +146,7 @@ class BaseMod extends JObject
      * @param array $params  必须使用 :param 占位符
      * @return bool|int
      */
-    protected function update($data, $condition = '', $params = [])
+    public function update($data, $condition = '', $params = [])
     {
         $sets = [];
         $vals = [];
@@ -185,7 +183,7 @@ class BaseMod extends JObject
      * @param array $params  必须使用 :param 占位符
      * @return bool|int
      */
-    protected function updateCounters($data, $condition = '', $params = [])
+    public function updateCounters($data, $condition = '', $params = [])
     {
         $sets = [];
         foreach ($data as $col=>$val) {

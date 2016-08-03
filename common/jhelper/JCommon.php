@@ -102,6 +102,22 @@ class JCommon
         return $cNet == $sNet;
     }
 
+
+    public static function checkMobileOperator($mobile)
+    {
+        $regex = [
+            'ismobile' => '^1(3[0-9]|4[57]|5[0-35-9]|8[0-9]|7[0678])[0-9]{8}$',
+            'ydmobile' => '(^1(3[4-9]|47|5[0-27-9]|78|8[2-478])[0-9]{8}$)|(^1705[0-9]{7}$)',
+            'ltmobile' => '(^1(3[0-2]|45|5[56]|76|8[56])[0-9]{8}$)|(^1709[0-9]{7}$)',
+            'dxmobile' => '(^1(33|53|77|8[019])[0-9]{8}$)|(^1700[0-9]{7}$)',
+        ];
+        if (!preg_match("/{$regex['ismobile']}/", $mobile)) return -1;
+        if (preg_match("/{$regex['ydmobile']}/", $mobile)) return 1;
+        if (preg_match("/{$regex['ltmobile']}/", $mobile)) return 2;
+        if (preg_match("/{$regex['dxmobile']}/", $mobile)) return 3;
+        return 0;
+    }
+    
     /**
      * 整型转换   排除直接 intval('23a3d') == 23 的情况
      * @param $str
