@@ -117,6 +117,65 @@ class BaseMod extends JObject
     }
 
     /**
+     * 以数组形式操作某列 插入值
+     * @param string $column
+     * @param mixed $value  强类型  如: 可同时插入  2  "2"
+     * @param bool $batch 批量
+     * @param bool $skipIfExist 插入值若存在 则跳过
+     * @param bool $all  影响所有行
+     * @return int
+     * @throws \Exception
+     */
+    public function push(string $column, $value , $batch = false, $skipIfExist = true, $all = false)
+    {
+        $options = ['upsert' => false, 'multi' => $all];
+        $mongo = Connection::getInstance($this->getDbName());
+        $bulk = new Bulk(['ordered' => true]);
+        if ($batch && is_array($value)) {
+            $value = ['$each'=>$value];
+        }
+        if ($skipIfExist) {
+            $bulk->update($this->where, ['$addToSet' => [$column => $value]], $options);
+        } else {
+            $bulk->update($this->where, ['$push' => [$column => $value]], $options);
+        }
+        try {
+            $result = $mongo->executeBulkWrite(
+                $this->getDbName() . '.' . $this->getTbName(),
+                $bulk
+            );
+            return $result->getModifiedCount();
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
+    /**
+     * 以数组形式操作某列 移除值
+     * @param string $column
+     * @param mixed $value
+     * @param bool $all  影响所有行
+     * @return int
+     * @throws \Exception
+     */
+    public function pull(string $column, $value, $all = false)
+    {
+        $options = ['upsert' => false, 'multi' => $all];
+        $mongo = Connection::getInstance($this->getDbName());
+        $bulk = new Bulk(['ordered' => true]);
+        $bulk->update($this->where, ['$pull' => [$column => $value]], $options);
+        try {
+            $result = $mongo->executeBulkWrite(
+                $this->getDbName() . '.' . $this->getTbName(),
+                $bulk
+            );
+            return $result->getModifiedCount();
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
+    /**
      * 更新记录
      * @param array $data ['col1'=>'val1', 'col2'=>2 , ...]
      * @param bool $all update All Record filtered by where

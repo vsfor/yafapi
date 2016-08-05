@@ -131,6 +131,7 @@ class HelloController extends \basecontroller\Console
 //		for ($i=1; $i<11; $i++) {
 //			$tm->insert(['a'=>$i,'b'=>$i%5]);
 //		}  
+		Jeen::echoln($tm->push('c',[[2],[3],4],false));
 		$r = $tm->one(); 
 		Jeen::echoln($r); 
 	}
